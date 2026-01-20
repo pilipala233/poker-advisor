@@ -53,40 +53,6 @@ body.card-panel-open {
   z-index: -1;
 }
 
-.hero {
-  padding: 48px clamp(20px, 6vw, 64px) 12px;
-}
-
-.hero-card {
-  background: rgba(14, 18, 15, 0.7);
-  border: 1px solid rgba(226, 180, 90, 0.2);
-  border-radius: 24px;
-  padding: clamp(20px, 4vw, 40px);
-  box-shadow: 0 20px 60px var(--shadow);
-  max-width: 920px;
-}
-
-.kicker {
-  text-transform: uppercase;
-  letter-spacing: 0.35em;
-  font-size: 0.7rem;
-  color: var(--muted);
-  margin: 0 0 10px;
-}
-
-h1 {
-  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
-  font-size: clamp(2.2rem, 5vw, 3.6rem);
-  margin: 0 0 12px;
-  color: var(--accent);
-}
-
-.lede {
-  margin: 0;
-  color: rgba(244, 239, 228, 0.78);
-  max-width: 720px;
-}
-
 .layout {
   display: grid;
   grid-template-columns: repeat(2, minmax(280px, 1fr));
@@ -123,6 +89,15 @@ h1 {
   animation-delay: 0.2s;
 }
 
+.card-panel-footer {
+  display: none;
+  margin-top: 12px;
+}
+
+.done-button {
+  width: 100%;
+}
+
 .panel-header {
   display: flex;
   justify-content: space-between;
@@ -139,18 +114,51 @@ h1 {
   justify-content: flex-end;
 }
 
+.suit-tabs {
+  display: none;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.suit-tab {
+  border: 1px solid rgba(226, 180, 90, 0.35);
+  background: rgba(12, 20, 16, 0.75);
+  color: var(--accent-soft);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.suit-tab.active {
+  background: rgba(226, 180, 90, 0.2);
+  color: var(--paper);
+  border-color: rgba(226, 180, 90, 0.7);
+  box-shadow: 0 0 0 1px rgba(226, 180, 90, 0.3);
+}
+
+.suit-tab .suit-icon {
+  font-size: 1rem;
+}
+
+.suit-tab[data-suit="H"],
+.suit-tab[data-suit="D"] {
+  color: var(--danger);
+}
+
 .panel-title {
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--muted);
   margin: 0 0 6px;
-}
-
-.panel-subtitle {
-  margin: 0;
-  color: rgba(244, 239, 228, 0.7);
-  font-size: 0.92rem;
 }
 
 .field {
@@ -184,6 +192,38 @@ h1 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
   gap: 10px;
+}
+
+.slot-wrap {
+  position: relative;
+}
+
+.slot-wrap .card-slot {
+  width: 100%;
+}
+
+.slot-clear {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(226, 180, 90, 0.45);
+  background: rgba(10, 18, 14, 0.9);
+  color: var(--paper);
+  font-size: 0.7rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 12px rgba(9, 12, 10, 0.3);
+}
+
+.slot-clear:hover {
+  border-color: rgba(226, 180, 90, 0.9);
+  color: var(--accent);
 }
 
 .card-slot {
@@ -316,27 +356,6 @@ h1 {
   color: rgba(244, 239, 228, 0.7);
 }
 
-.analysis-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.meta-pill {
-  padding: 6px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(226, 180, 90, 0.25);
-  font-size: 0.8rem;
-  color: var(--accent-soft);
-}
-
-.note {
-  font-size: 0.9rem;
-  color: rgba(244, 239, 228, 0.7);
-  line-height: 1.5;
-}
-
 .legend {
   display: flex;
   gap: 10px;
@@ -371,10 +390,6 @@ h1 {
 
 .legend-board {
   color: #7fb0ff;
-}
-
-.legend-used {
-  color: rgba(244, 239, 228, 0.6);
 }
 
 .card-grid {
@@ -561,6 +576,10 @@ h1 {
     grid-area: auto;
   }
 
+  .suit-tabs {
+    display: flex;
+  }
+
   body.card-panel-open .card-panel {
     display: flex;
     flex-direction: column;
@@ -572,9 +591,15 @@ h1 {
   }
 
   body.card-panel-open .card-grid {
-    max-height: calc(100vh - 240px);
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding-right: 6px;
+  }
+
+  .card-panel-footer {
+    display: flex;
+    justify-content: center;
   }
 
   body.card-panel-open .overlay {

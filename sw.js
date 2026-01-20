@@ -1,6 +1,5 @@
-const CACHE_NAME = "turnsense-pwa-v2";
+const CACHE_NAME = "turnsense-pwa-v10";
 const ASSETS = [
-  ".",
   "index.html",
   "styles.css",
   "app.js",

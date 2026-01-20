@@ -12,7 +12,8 @@ const state = {
   opponents: 1,
   hero: [null, null],
   board: [null, null, null, null, null],
-  active: { type: "hero", index: 0 }
+  active: { type: "hero", index: 0 },
+  activeSuit: SUITS[0].key
 };
 
 const elements = {
@@ -20,18 +21,19 @@ const elements = {
   boardSlots: document.getElementById("board-slots"),
   cardGrid: document.getElementById("card-grid"),
   cardPanel: document.getElementById("card-panel"),
+  suitTabs: document.getElementById("suit-tabs"),
   opponents: document.getElementById("opponents"),
   analyzeBtn: document.getElementById("analyze-btn"),
   clearBtn: document.getElementById("clear-btn"),
   openCardPanel: document.getElementById("open-card-panel"),
   closeCardPanel: document.getElementById("close-card-panel"),
+  doneCardPanel: document.getElementById("done-card-panel"),
   overlay: document.getElementById("overlay"),
   status: document.getElementById("status"),
   winRate: document.getElementById("win-rate"),
   recommendation: document.getElementById("recommendation"),
   threshold: document.getElementById("threshold"),
-  stageLabel: document.getElementById("stage-label"),
-  simCount: document.getElementById("sim-count")
+  stageLabel: document.getElementById("stage-label")
 };
 
 const cardMap = new Map();
@@ -40,13 +42,12 @@ const modalQuery = window.matchMedia("(max-width: 860px)");
 let lastFocus = null;
 
 function init() {
-  if (elements.simCount) {
-    elements.simCount.textContent = SIMULATIONS.toString();
-  }
   buildSlots(elements.heroSlots, "hero", 2);
   buildSlots(elements.boardSlots, "board", 5);
+  buildSuitTabs();
   buildCardGrid();
   setActiveSlot("hero", 0);
+  setActiveSuit(state.activeSuit);
   bindEvents();
   syncCardPanelMode();
   renderAll();
@@ -55,13 +56,33 @@ function init() {
 function buildSlots(container, type, count) {
   container.innerHTML = "";
   for (let i = 0; i < count; i += 1) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "slot-wrap";
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "card-slot";
     button.dataset.type = type;
     button.dataset.index = i.toString();
     button.addEventListener("click", () => handleSlotClick(type, i));
-    container.appendChild(button);
+
+    const clearButton = document.createElement("button");
+    clearButton.type = "button";
+    clearButton.className = "slot-clear";
+    clearButton.dataset.type = type;
+    clearButton.dataset.index = i.toString();
+    clearButton.setAttribute("aria-label", "清除这张牌");
+    clearButton.textContent = "X";
+    clearButton.hidden = true;
+    clearButton.addEventListener("click", (event) => {
+      event.stopPropagation();
+      clearSlot(type, i);
+      renderAll();
+    });
+
+    wrapper.appendChild(button);
+    wrapper.appendChild(clearButton);
+    container.appendChild(wrapper);
   }
 }
 
@@ -72,6 +93,7 @@ function buildCardGrid() {
   SUITS.forEach((suit, suitIndex) => {
     const section = document.createElement("div");
     section.className = "card-section";
+    section.dataset.suit = suit.key;
 
     const title = document.createElement("div");
     title.className = "card-section-title";
@@ -111,6 +133,25 @@ function buildCardGrid() {
   });
 }
 
+function buildSuitTabs() {
+  if (!elements.suitTabs) {
+    return;
+  }
+  elements.suitTabs.innerHTML = "";
+  SUITS.forEach((suit) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "suit-tab";
+    button.dataset.suit = suit.key;
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", "false");
+    button.setAttribute("tabindex", "-1");
+    button.innerHTML = `<span class="suit-icon">${suit.symbol}</span><span class="suit-text">${suit.label}</span>`;
+    button.addEventListener("click", () => setActiveSuit(suit.key));
+    elements.suitTabs.appendChild(button);
+  });
+}
+
 function bindEvents() {
   elements.opponents.addEventListener("change", () => {
     const value = clampInt(elements.opponents.value, 1, 8, 1);
@@ -141,6 +182,10 @@ function bindEvents() {
     elements.closeCardPanel.addEventListener("click", () => setCardPanelOpen(false));
   }
 
+  if (elements.doneCardPanel) {
+    elements.doneCardPanel.addEventListener("click", () => setCardPanelOpen(false));
+  }
+
   if (elements.overlay) {
     elements.overlay.addEventListener("click", () => setCardPanelOpen(false));
   }
@@ -163,24 +208,95 @@ function bindEvents() {
       if (!target) {
         return;
       }
-      const index = target === "hero" ? findFirstEmpty(state.hero) : findFirstEmpty(state.board);
-      setActiveSlot(target, index >= 0 ? index : 0);
+      const autoTarget = getAutoTargetSlot();
+      if (autoTarget) {
+        setActiveSlot(autoTarget.type, autoTarget.index);
+      } else {
+        setActiveSlot(target, 0);
+      }
       openCardPanelIfNeeded();
     });
   });
 }
 
-function setActiveSlot(type, index) {
+function setActiveState(type, index) {
   state.active = { type, index };
+  const code = state[type][index];
+  if (code !== null) {
+    const suitKey = SUITS[Math.floor(code / 13)].key;
+    setActiveSuit(suitKey);
+  }
   document.querySelectorAll(".chip").forEach((chip) => {
     chip.classList.toggle("chip-active", chip.dataset.target === type);
   });
+}
+
+function setActiveSlot(type, index) {
+  setActiveState(type, index);
   renderSlots();
   renderCardGrid();
 }
 
+function setActiveSuit(suit) {
+  state.activeSuit = suit;
+  updateSuitTabs();
+  applySuitFilter();
+}
+
+function updateSuitTabs() {
+  if (!elements.suitTabs) {
+    return;
+  }
+  const tabs = Array.from(elements.suitTabs.querySelectorAll(".suit-tab"));
+  tabs.forEach((tab) => {
+    const isActive = tab.dataset.suit === state.activeSuit;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", isActive ? "true" : "false");
+    tab.setAttribute("tabindex", isActive ? "0" : "-1");
+  });
+}
+
+function applySuitFilter() {
+  const filterEnabled = modalQuery.matches;
+  document.querySelectorAll(".card-section").forEach((section) => {
+    if (!filterEnabled) {
+      section.hidden = false;
+      return;
+    }
+    section.hidden = section.dataset.suit !== state.activeSuit;
+  });
+}
+
+function getAutoTargetSlot() {
+  const heroIndex = findFirstEmpty(state.hero);
+  if (heroIndex >= 0) {
+    return { type: "hero", index: heroIndex };
+  }
+  const boardIndex = findFirstEmpty(state.board);
+  if (boardIndex >= 0) {
+    return { type: "board", index: boardIndex };
+  }
+  return null;
+}
+
+function syncActiveState() {
+  const target = getAutoTargetSlot();
+  if (!target) {
+    return;
+  }
+  if (state.active.type === target.type && state.active.index === target.index) {
+    return;
+  }
+  setActiveState(target.type, target.index);
+}
+
 function handleSlotClick(type, index) {
-  setActiveSlot(type, index);
+  const autoTarget = getAutoTargetSlot();
+  if (autoTarget) {
+    setActiveSlot(autoTarget.type, autoTarget.index);
+  } else {
+    setActiveSlot(type, index);
+  }
   openCardPanelIfNeeded();
 }
 
@@ -195,6 +311,7 @@ function openCardPanelIfNeeded() {
 
 function syncCardPanelMode() {
   if (!elements.cardPanel || !elements.openCardPanel) {
+    syncSuitTabsMode();
     return;
   }
 
@@ -207,6 +324,7 @@ function syncCardPanelMode() {
     if (elements.overlay) {
       elements.overlay.setAttribute("aria-hidden", "true");
     }
+    syncSuitTabsMode();
     return;
   }
 
@@ -216,6 +334,7 @@ function syncCardPanelMode() {
       elements.overlay.setAttribute("aria-hidden", "true");
     }
   }
+  syncSuitTabsMode();
 }
 
 function setCardPanelOpen(open) {
@@ -250,11 +369,18 @@ function setCardPanelOpen(open) {
   }
 }
 
+function syncSuitTabsMode() {
+  if (!elements.suitTabs) {
+    return;
+  }
+  elements.suitTabs.hidden = !modalQuery.matches;
+  applySuitFilter();
+}
+
 function handleCardPick(code) {
   const location = findCardLocation(code);
   if (location) {
-    state[location.type][location.index] = null;
-    setActiveSlot(location.type, location.index);
+    clearSlot(location.type, location.index);
     renderAll();
     return;
   }
@@ -264,38 +390,38 @@ function handleCardPick(code) {
 }
 
 function assignToActiveSlot(code) {
-  const { type, index } = state.active;
-  if (!type) {
+  const autoTarget = getAutoTargetSlot();
+  const target = autoTarget || state.active;
+  if (!target || !target.type) {
     return;
   }
-  state[type][index] = code;
-  advanceSlot(type, index);
+  state[target.type][target.index] = code;
 }
 
-function advanceSlot(type, index) {
-  const slots = state[type];
-  for (let i = index + 1; i < slots.length; i += 1) {
-    if (slots[i] === null) {
-      setActiveSlot(type, i);
-      return;
-    }
+function clearSlot(type, index) {
+  if (state[type][index] === null) {
+    return;
   }
-
-  if (type === "hero") {
-    const nextBoard = findFirstEmpty(state.board);
-    if (nextBoard >= 0) {
-      setActiveSlot("board", nextBoard);
-      return;
-    }
+  state[type][index] = null;
+  if (type === "board") {
+    normalizeBoard();
   }
-  setActiveSlot(type, index);
 }
 
 function renderAll() {
+  syncActiveState();
   renderSlots();
   renderCardGrid();
   updateStageLabel();
   updateThreshold();
+}
+
+function normalizeBoard() {
+  const packed = state.board.filter((card) => card !== null);
+  while (packed.length < state.board.length) {
+    packed.push(null);
+  }
+  state.board = packed;
 }
 
 function renderSlots() {
@@ -308,9 +434,13 @@ function renderSlotGroup(container, cards) {
   buttons.forEach((button) => {
     const index = Number(button.dataset.index);
     const code = cards[index];
+    const clearButton = button.parentElement?.querySelector(".slot-clear");
     const isActive = button.dataset.type === state.active.type && index === state.active.index;
     button.classList.toggle("active", isActive);
     button.classList.toggle("filled", code !== null);
+    if (clearButton) {
+      clearButton.hidden = code === null;
+    }
     if (code !== null) {
       const card = cardMap.get(code);
       button.dataset.suit = card.suit;
