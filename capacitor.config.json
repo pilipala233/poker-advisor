@@ -1,0 +1,6 @@
+{
+  "appId": "com.yoo.pokeradvisor",
+  "appName": "TurnSense 德扑助手",
+  "webDir": "dist",
+  "bundledWebRuntime": false
+}

@@ -1,0 +1,25 @@
+{
+  "name": "poker-advisor",
+  "version": "1.0.0",
+  "description": "TurnSense poker advisor",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-web.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pilipala233/poker-advisor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pilipala233/poker-advisor/issues"
+  },
+  "homepage": "https://github.com/pilipala233/poker-advisor#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1"
+  }
+}
