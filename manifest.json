@@ -1,0 +1,32 @@
+{
+  "name": "TurnSense 德扑助手",
+  "short_name": "德扑助手",
+  "start_url": ".",
+  "scope": ".",
+  "id": "turnsense-poker",
+  "lang": "zh-CN",
+  "display": "standalone",
+  "background_color": "#143126",
+  "theme_color": "#143126",
+  "description": "德州扑克入局/退出建议，基于蒙特卡洛胜率估算。",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
