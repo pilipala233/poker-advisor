@@ -4,6 +4,7 @@ android/.gradle/
 android/.idea/
 android/build/
 android/app/build/
+android/keystore/
 android/capacitor-cordova-android-plugins/
 android/local.properties
 .DS_Store
