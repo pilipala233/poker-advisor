@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#143126" />
+    <title>TurnSense 德扑助手</title>
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="manifest" href="manifest.json" />
+  </head>
+  <body>
+    <div class="felt-glow" aria-hidden="true"></div>
+    <div class="felt-noise" aria-hidden="true"></div>
+
+    <main class="layout">
+      <section class="panel input-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-title">牌桌设置</p>
+          </div>
+          <div class="field">
+            <label for="opponents">对手人数</label>
+            <input id="opponents" type="number" min="1" max="8" value="1" />
+          </div>
+        </div>
+
+        <div class="slot-group">
+          <div class="slot-title">我的手牌</div>
+          <div id="hero-slots" class="slot-row"></div>
+        </div>
+
+        <div class="slot-group">
+          <div class="slot-title">公共牌</div>
+          <div id="board-slots" class="slot-row"></div>
+        </div>
+
+        <div class="target-toggle">
+          <span class="toggle-label">当前目标</span>
+          <button class="chip chip-active" data-target="hero" type="button">手牌</button>
+          <button class="chip" data-target="board" type="button">公共牌</button>
+        </div>
+
+        <div class="actions">
+          <button id="analyze-btn" class="primary" type="button">开始分析</button>
+          <button id="clear-btn" class="ghost" type="button">清空</button>
+        </div>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="card-panel" class="panel card-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-title">牌库</p>
+          </div>
+          <div class="panel-actions">
+            <div class="legend">
+              <span class="legend-item legend-hero">手牌</span>
+              <span class="legend-item legend-board">公共牌</span>
+            </div>
+            <button id="close-card-panel" class="panel-close" type="button">关闭</button>
+          </div>
+        </div>
+        <div id="suit-tabs" class="suit-tabs" role="tablist" aria-label="按花色筛选"></div>
+        <div id="card-grid" class="card-grid" role="list"></div>
+        <div class="card-panel-footer">
+          <button id="done-card-panel" class="primary done-button" type="button">完成</button>
+        </div>
+      </section>
+
+      <section class="panel analysis-panel">
+        <div class="panel-header">
+          <div>
+            <p class="panel-title">结果</p>
+          </div>
+        </div>
+
+        <div class="metric">
+          <p class="metric-label">胜率</p>
+          <p class="metric-value" id="win-rate">--</p>
+          <p class="metric-subtext" id="threshold">阈值：--</p>
+        </div>
+
+        <div class="metric">
+          <p class="metric-label">建议</p>
+          <p class="metric-value emphasis" id="recommendation">--</p>
+          <p class="metric-subtext" id="stage-label">阶段：翻牌前</p>
+        </div>
+      </section>
+    </main>
+
+    <button
+      id="open-card-panel"
+      class="fab"
+      type="button"
+      aria-controls="card-panel"
+      aria-expanded="false"
+    >
+      选牌
+    </button>
+    <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+    <script src="app.js" defer></script>
+  </body>
+</html>
