@@ -11,6 +11,8 @@
   --danger: #c4473a;
   --shadow: rgba(9, 12, 10, 0.35);
   --glow: rgba(226, 180, 90, 0.32);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --extra-top-gap: 0px;
 }
 
 *,
@@ -61,6 +63,7 @@ body.card-panel-open {
     "cards cards";
   gap: 24px;
   padding: 20px clamp(20px, 6vw, 64px) 36px;
+  padding-top: calc(20px + var(--safe-top) + var(--extra-top-gap));
 }
 
 .panel {
@@ -623,12 +626,17 @@ body.card-panel-open {
 }
 
 @media (max-width: 540px) {
+  :root {
+    --extra-top-gap: 8px;
+  }
+
   .hero {
     padding: 32px 20px 12px;
   }
 
   .layout {
     padding: 16px 20px 24px;
+    padding-top: calc(16px + var(--safe-top) + var(--extra-top-gap));
   }
 
   .card-section-grid {

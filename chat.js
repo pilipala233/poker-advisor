@@ -29,6 +29,7 @@ let avatarClickTimer = null;
 let nameClickCount = 0;
 let nameClickTimer = null;
 const CLICK_INTERVAL = 500; // 连续点击的最大间隔
+let currentKeyboardOffset = 0;
 
 // 头像裁剪相关
 let currentAvatarType = null; // 'self' 或 'other'
@@ -523,13 +524,48 @@ function scrollToBottom() {
   elements.chatMessages.scrollTop = elements.chatMessages.scrollHeight;
 }
 
+function setKeyboardOffset(height) {
+  const next = Math.max(0, Math.round(height || 0));
+  if (next === currentKeyboardOffset) return;
+  currentKeyboardOffset = next;
+  document.documentElement.style.setProperty("--keyboard-offset", `${next}px`);
+}
+
+function getKeyboardPlugin() {
+  if (!window.Capacitor || !window.Capacitor.Plugins) return null;
+  if (typeof window.Capacitor.getPlatform === "function") {
+    if (window.Capacitor.getPlatform() === "web") return null;
+  }
+  return window.Capacitor.Plugins.Keyboard || null;
+}
+
 // 处理键盘弹出时的滚动
 function setupKeyboardHandler() {
-  // 使用 visualViewport API（现代浏览器）
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener("resize", () => {
-      scrollToBottom();
-    });
+  const keyboard = getKeyboardPlugin();
+
+  if (keyboard) {
+    const showHandler = (info) => {
+      setKeyboardOffset(info && info.keyboardHeight);
+      setTimeout(scrollToBottom, 50);
+    };
+    const hideHandler = () => {
+      setKeyboardOffset(0);
+      setTimeout(scrollToBottom, 50);
+    };
+
+    keyboard.addListener("keyboardWillShow", showHandler);
+    keyboard.addListener("keyboardDidShow", showHandler);
+    keyboard.addListener("keyboardWillHide", hideHandler);
+    keyboard.addListener("keyboardDidHide", hideHandler);
+  } else if (window.visualViewport) {
+    const updateFromViewport = () => {
+      const offset = Math.max(0, window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop);
+      setKeyboardOffset(offset);
+      setTimeout(scrollToBottom, 50);
+    };
+
+    window.visualViewport.addEventListener("resize", updateFromViewport);
+    window.visualViewport.addEventListener("scroll", updateFromViewport);
   }
 
   // 输入框获得焦点时滚动

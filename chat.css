@@ -1,3 +1,10 @@
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --keyboard-offset: 0px;
+  --extra-top-gap: 0px;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -18,6 +25,7 @@ body {
   max-width: 100%;
   margin: 0 auto;
   background: #EDEDED;
+  padding-bottom: calc(var(--safe-bottom) + var(--keyboard-offset));
 }
 
 /* 顶部导航栏 */
@@ -26,6 +34,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 10px 12px;
+  padding-top: calc(10px + var(--safe-top) + var(--extra-top-gap));
   background: #EDEDED;
   border-bottom: 1px solid #D9D9D9;
   position: sticky;
@@ -223,6 +232,7 @@ body {
   display: flex;
   align-items: center;
   padding: 10px 12px;
+  padding-top: calc(10px + var(--safe-top) + var(--extra-top-gap));
   background: #EDEDED;
   border-bottom: 1px solid #D9D9D9;
 }
@@ -342,4 +352,10 @@ body {
   max-width: 100%;
   max-height: 280px;
   border-radius: 4px;
+}
+
+@media (max-width: 540px) {
+  :root {
+    --extra-top-gap: 8px;
+  }
 }
