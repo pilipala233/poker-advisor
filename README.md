@@ -34,3 +34,6 @@ android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 如果更改了前端代码，重复执行 `npm run build` 和 `npx cap sync android` 即可。
+
+## 版本记录
+- v1.0.1：修复 APK 键盘弹出导致页面上移，键盘弹出/收起时聊天自动滚动，移动端顶部间距优化

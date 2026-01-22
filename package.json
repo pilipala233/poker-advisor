@@ -1,6 +1,6 @@
 {
   "name": "poker-advisor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "TurnSense poker advisor",
   "private": true,
   "scripts": {
